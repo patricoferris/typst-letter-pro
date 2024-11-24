@@ -99,19 +99,19 @@
   header: none,
   footer: none,
   
-  folding-marks: true,
-  hole-mark: true,
+  folding-marks: false,
+  hole-mark: false,
   
   address-box: none,
   information-box: none,
   
   reference-signs: none,
   
-  page-numbering: auto,
+  page-numbering: none,
 
   margin: (
     left:   25mm,
-    right:  20mm,
+    right:  25mm,
     top:    20mm,
     bottom: 20mm,
   ),
@@ -124,7 +124,7 @@
   
   margin = (
     left:   margin.at("left",   default: 25mm),
-    right:  margin.at("right",  default: 20mm),
+    right:  margin.at("right",  default: 25mm),
     top:    margin.at("top",    default: 20mm),
     bottom: margin.at("bottom", default: 20mm),
   )
@@ -198,7 +198,7 @@
   pad(top: -margin.top, left: -margin.left, right: -margin.right, {
     grid(
       columns: 100%,
-      rows: (letter-formats.at(format).header-size, 45mm),
+      rows: (letter-formats.at(format).header-size, 28mm),
       
       // Header box
       header,
@@ -219,8 +219,6 @@
       }),
     )
   })
-
-  v(12pt)
 
   // Reference signs
   if (reference-signs != none) and (reference-signs.len() > 0) {
@@ -274,29 +272,6 @@
   }
 }
 
-/// Creates a simple sender box with a name and an address.
-/// 
-/// - name (content, none): Name of the sender
-/// - address (content, none): Address of the sender
-#let sender-box(name: none, address) = rect(width: 85mm, height: 5mm, stroke: none, inset: 0pt, {
-  set text(size: 7pt)
-  set align(horizon)
-  
-  pad(left: 5mm, underline(offset: 2pt, {
-    if name != none {
-      name
-    }
-
-    if (name != none) and (address != none) {
-      ", "
-    }
-
-    if address != none {
-      address
-    }
-  }))
-})
-
 /// Creates a simple annotations box.
 /// 
 /// - content (content, none): The content
@@ -337,7 +312,7 @@
 #let address-duobox(sender, recipient) = {
   grid(
     columns: 1,
-    rows: (17.7mm, 27.3mm),
+    rows: (10.7mm, 17.3mm),
       
     sender,
     recipient,
@@ -400,7 +375,7 @@
       rows: (5mm, 12.7mm, 27.3mm),
       
       sender,
-      annotations,
+      // annotations,
       recipient,
     )
   }
@@ -493,8 +468,8 @@
   header: auto,
   footer: none,
 
-  folding-marks: true,
-  hole-mark: true,
+  folding-marks: false,
+  hole-mark: false,
   
   sender: (
     name: none,
@@ -513,7 +488,7 @@
   date: none,
   subject: none,
 
-  page-numbering: auto,
+  page-numbering: none,
 
   margin: (
     left:   25mm,
@@ -552,20 +527,23 @@
       align(bottom + right, header-simple(
         sender.name,
         if sender.address != none {
-          sender.address.split(", ").join(linebreak())
+		  if type(sender.address) == content {
+            sender.address
+		  } else if type(sender.address) == string {
+            sender.address.split(", ").join(linebreak())
+		  }
         },
         extra: sender.at("extra", default: none),
       ))
     )
   }
 
-  let sender-box      = sender-box(name: sender.name, sender.address)
   let annotations-box = annotations-box(annotations)
   let recipient-box   = recipient-box(recipient)
 
-  let address-box     = address-tribox(sender-box, annotations-box, recipient-box, stamp: stamp)
+  let address-box     = address-tribox(none, annotations-box, recipient-box, stamp: stamp)
   if (annotations == none) and (stamp == false) {
-    address-box = address-duobox(align(bottom, pad(bottom: 0.65em, sender-box)), recipient-box)
+    address-box = address-duobox(none, recipient-box)
   }
   
   letter-generic(
